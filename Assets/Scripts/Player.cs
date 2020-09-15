@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _jumpHeight = 15.0f;
     private float _yVelocity;
+    private bool _canDoubleJump = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -40,11 +41,20 @@ public class Player : MonoBehaviour
             {
                 //velocity.y += _jumpHeight; Este al cambiar la direccion en el siguiente frame se regresa a 0, por eso es el error
                 _yVelocity = _jumpHeight;
+                _canDoubleJump = true;
             }
            
         }
         else
         {
+            if (_canDoubleJump)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    _yVelocity += _jumpHeight;
+                    _canDoubleJump = false;
+                }
+            }
             //velocity.y -= _gravity;
             _yVelocity -= _gravity;
         }
