@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private int _coins;
     private UIManager _uiManager;
+    [SerializeField]
+    private int _lives = 3;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +28,7 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("UIManager is null");
         }
+        _uiManager.UpdateLivesDisplay(_lives);
     }
 
     // Update is called once per frame
@@ -74,5 +78,14 @@ public class Player : MonoBehaviour
     {
         _coins++;
         _uiManager.UpdateCoinDisplay(_coins);
+    }
+    public void Damage()
+    {
+        _lives--;
+        _uiManager.UpdateLivesDisplay(_lives);
+        if (_lives < 1)
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 }
