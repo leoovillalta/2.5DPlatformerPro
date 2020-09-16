@@ -88,4 +88,8 @@ public class Player : MonoBehaviour
             SceneManager.LoadScene(0);
         }
     }
+    public int GetCoins()
+    {
+        return _coins;
+    }
 }
