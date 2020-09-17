@@ -19,6 +19,10 @@ public class Player : MonoBehaviour
     private UIManager _uiManager;
     [SerializeField]
     private int _lives = 3;
+    private Vector3 _direction, _velocity;
+    private bool _canWallJump = false;
+    private Vector3 _wallSurfaceNormal;
+    private float _pushPower = 2.0f;
     // Start is called before the first frame update
     void Start()
     {
@@ -36,10 +40,12 @@ public class Player : MonoBehaviour
     {
         //get horizontal input
         float horizontalInput = Input.GetAxis("Horizontal");
+        
+        //IF I WANT TO MAKE THAT THE PLAYER CHANGE ITS POSITION AT MID AIR LEAVE IT HERE if I DONT WANT HIM TO CHANGE POSITION USE IT INSIDE THE isGrounded check
         //Define driection based on input
-        Vector3 direction = new Vector3(horizontalInput, 0, 0);
         //Vector3 direction = new Vector3(horizontalInput, 0, 0);
-        Vector3 velocity = direction * _speed;
+        //Vector3 direction = new Vector3(horizontalInput, 0, 0);
+        //Vector3 velocity = direction * _speed;
         //MOVE based on direction
 
         //if grounded
@@ -48,6 +54,10 @@ public class Player : MonoBehaviour
         //appply gravity
         if(_controller.isGrounded == true)
         {
+            _canWallJump = true;
+            _direction = new Vector3(horizontalInput, 0, 0);
+            //Vector3 direction = new Vector3(horizontalInput, 0, 0);
+            _velocity = _direction * _speed;
             //do nothing maybe jump later
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -59,21 +69,68 @@ public class Player : MonoBehaviour
         }
         else
         {
-            if (_canDoubleJump)
-            {
-                if (Input.GetKeyDown(KeyCode.Space))
+            
+            
+                if (Input.GetKeyDown(KeyCode.Space) && _canWallJump ==false)
                 {
-                    _yVelocity += _jumpHeight;
-                    _canDoubleJump = false;
+                    if (_canDoubleJump)
+                    {
+                        _yVelocity += _jumpHeight;
+                        _canDoubleJump = false;
+                    }
+                    
                 }
-            }
+                if (Input.GetKeyDown(KeyCode.Space) && _canWallJump == true)
+                {
+                //velocity == surfacenormal of the wall
+                    _yVelocity = _jumpHeight;
+                    _velocity = _wallSurfaceNormal*_speed;
+
+                }
+            
             //velocity.y -= _gravity;
             _yVelocity -= _gravity;
         }
-        velocity.y = _yVelocity;
+        _velocity.y = _yVelocity;
 
-        _controller.Move(velocity * Time.deltaTime);
+        _controller.Move(_velocity * Time.deltaTime);
     }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+
+        //Check for moving box
+        if(hit.transform.tag == "Moving Box")
+        {
+            Rigidbody box = hit.collider.GetComponent<Rigidbody>();
+            if(box!= null)
+            {
+                Vector3 pushDirection = new Vector3(hit.moveDirection.x, 0,0);
+                box.velocity = pushDirection * _pushPower;
+            }
+
+
+        }
+
+        //confirm it has a rigidbody
+
+        //pushpower declare variable
+
+        //push direction
+
+        // push direction * push power
+
+
+
+        if(_controller.isGrounded ==false && hit.transform.tag == "Wall")
+        {
+            Debug.DrawRay(hit.point, hit.normal, Color.blue);
+            _wallSurfaceNormal = hit.normal;
+            _canWallJump = true;
+        }
+        
+    }
+
     public void AddCoins()
     {
         _coins++;
